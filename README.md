@@ -3,7 +3,7 @@
 > "You're not going to find your purpose in life. You're going to create it." - Davud Goggins 
 
 <div align="center">
-  <a href="procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app">
+  <a href="[procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app](https://procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app/)">
    <img src="https://img.shields.io/badge/Live%20Demo-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" height="50"/>
   </a>
 &nbsp;&nbsp;&nbsp;
@@ -65,7 +65,7 @@ Nothing fancy, just what works:
 ## Quick Start
 
 ### 🌐 Try it Online (Easiest)
-  <a href="procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app">
+  <a href="[procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app](https://procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app/)">
    <img src="https://img.shields.io/badge/Live%20Demo-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" height="50"/>
   </a>
   
