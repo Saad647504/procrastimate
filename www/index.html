@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProcrastiMate</title>
+  <script src="https://cdn.tailwindcss.com/3.4.0"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="./output.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="description" content="Destroy procrastination with motivation from legends">
+
+  <style>
+    * {
+      font-size: 0.875rem !important; /* text-sm */
+      font-weight: 600 !important; /* font-semibold */
+      text-transform: uppercase !important; /* uppercase */
+      letter-spacing: 0.1em !important; /* tracking-widest */
+    }
+    input, textarea {
+      text-transform: none !important;
+      letter-spacing: normal !important;
+    }
+    h1 { font-size: 1rem !important; }
+    h2 { font-size: 0.9rem !important; }
+    h3 { font-size: 0.875rem !important; }
+    header {
+      padding-top: 1rem !important;
+      padding-bottom: 1rem !important;
+      margin-bottom: 1rem !important;
+    }
+    #timer-minutes, #timer-seconds {
+      font-size: 2.25rem !important; /* text-4xl */
+      text-transform: none !important;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white font-sans min-h-screen">
+  
+  <!-- intro screen -->
+  <div id="intro-screen" class="fixed inset-0 bg-black z-[10000] flex items-center justify-center overflow-hidden">
+    <div class="particles"></div>
+    <div class="brain-container relative">
+      <div class="electric-ring ring-1"></div>
+      <div class="electric-ring ring-2"></div>
+      <div class="electric-ring ring-3"></div>
+      <img src="icons/reshot-icon-brain-SYKDAZJRUC.svg" 
+           alt="ProcrastiMate Brain" 
+           class="w-32 h-32 brain-intro-icon relative z-10" />
+      <svg class="lightning bolt-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20,5 L35,35 L25,35 L40,60" stroke="#ff4433" stroke-width="2" fill="none"/>
+      </svg>
+      <svg class="lightning bolt-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M60,5 L45,35 L55,35 L40,60" stroke="#ff6655" stroke-width="2" fill="none"/>
+      </svg>
+      <div class="energy-particle p1"></div>
+      <div class="energy-particle p2"></div>
+      <div class="energy-particle p3"></div>
+      <div class="energy-particle p4"></div>
+    </div>
+    <div class="absolute bottom-20 text-center">
+      <p class="text-red-500 font-bold text-sm tracking-widest loading-text">INITIALIZING BEAST MODE</p>
+      <div class="loading-bar mt-2"></div>
+    </div>
+  </div>
+
+  <!-- auth screen -->
+  <div id="auth-screen" class="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800 z-[9999] hidden">
+    <div class="auth-container w-full h-full flex items-center justify-center">
+      
+      <!-- login -->
+      <div id="login-container" class="auth-form glass-card rounded-2xl p-8 w-full max-w-md mx-4">
+        <div class="text-center mb-8">
+          <img src="icons/reshot-icon-brain-SYKDAZJRUC.svg" 
+               alt="ProcrastiMate" 
+               class="w-16 h-16 mx-auto mb-4 filter drop-shadow-lg" />
+          <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+          <p class="text-gray-400 text-sm">Time to destroy procrastination</p>
+        </div>
+        <form id="login-form">
+          <input type="email" id="login-email" placeholder="Email" required
+                 class="w-full bg-gray-800/50 rounded-xl p-4 text-white placeholder-gray-500 mb-4 focus:ring-2 focus:ring-red-500 outline-none">
+          <input type="password" id="login-password" placeholder="Password" required minlength="6"
+                 class="w-full bg-gray-800/50 rounded-xl p-4 text-white placeholder-gray-500 mb-6 focus:ring-2 focus:ring-red-500 outline-none">
+          <button type="submit" id="login-btn"
+                  class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">
+            UNLOCK BEAST MODE
+          </button>
+        </form>
+        <div class="text-center mt-6">
+          <p class="text-gray-500 text-sm">
+            First time? <a href="#" id="show-signup" class="text-red-400 hover:text-red-300">Create Account</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- signup -->
+      <div id="signup-container" class="auth-form glass-card rounded-2xl p-8 w-full max-w-md mx-4 hidden">
+        <div class="text-center mb-8">
+          <img src="icons/reshot-icon-brain-SYKDAZJRUC.svg" 
+               alt="ProcrastiMate" 
+               class="w-16 h-16 mx-auto mb-4 filter drop-shadow-lg" />
+          <h1 class="text-3xl font-bold text-white mb-2">Join The Grind</h1>
+          <p class="text-gray-400 text-sm">Your procrastination dies today</p>
+        </div>
+        <form id="signup-form">
+          <input type="text" id="signup-name" placeholder="Full Name" required
+                 class="w-full bg-gray-800/50 rounded-xl p-4 text-white placeholder-gray-500 mb-4 focus:ring-2 focus:ring-red-500 outline-none">
+          <input type="email" id="signup-email" placeholder="Email" required
+                 class="w-full bg-gray-800/50 rounded-xl p-4 text-white placeholder-gray-500 mb-4 focus:ring-2 focus:ring-red-500 outline-none">
+          <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required minlength="6"
+                 class="w-full bg-gray-800/50 rounded-xl p-4 text-white placeholder-gray-500 mb-6 focus:ring-2 focus:ring-red-500 outline-none">
+          <button type="submit" id="signup-btn"
+                  class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">
+            START MY JOURNEY
+          </button>
+        </form>
+        <div class="text-center mt-6">
+          <p class="text-gray-500 text-sm">
+            Already grinding? <a href="#" id="show-login" class="text-red-400 hover:text-red-300">Sign In</a>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- onboarding -->
+  <div id="onboarding" class="fixed inset-0 z-[9000] hidden">
+    <div class="relative h-screen w-full overflow-hidden">
+      <button id="skip-onboarding" class="absolute top-6 right-6 z-50 text-white/80 hover:text-white transition-colors text-sm font-medium">
+        Skip
+      </button>
+
+      <div class="relative h-full w-full overflow-hidden">
+        <div id="slides-container" class="flex h-full transition-transform duration-500 ease-out">
+
+          <!-- slide 1 -->
+          <div style="width: 25%; height: 100%; position: relative; flex-shrink: 0;">
+            <div class="absolute inset-0">
+              <img src="icons/roman-denisenko-OAx0oQ8I5a0-unsplash.jpg" alt="Focus" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/20"></div>
+            </div>
+            <div class="relative z-10 h-full flex flex-col justify-between p-8 pt-20">
+              <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                  Lock in and smash your goals.
+                </h1>
+                <p class="text-base md:text-lg text-gray-200 max-w-md">
+                  Use our focus timer to stay disciplined.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- slide 2 -->
+          <div style="width: 25%; height: 100%; position: relative; flex-shrink: 0;">
+            <div class="absolute inset-0">
+              <img src="icons/eduardo-cano-photo-co-9xL_8KCEQqE-unsplash.jpg" alt="Motivation" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/20"></div>
+            </div>
+            <div class="relative z-10 h-full flex flex-col justify-between p-8 pt-20">
+              <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                  Daily tough-love motivation.
+                </h1>
+                <p class="text-base md:text-lg text-gray-200 max-w-md">
+                  Stay inspired with quotes from top coaches.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- slide 3: stats -->
+          <div style="width: 25%; height: 100%; position: relative; flex-shrink: 0;">
+            <!-- bg image -->
+            <div class="absolute inset-0">
+              <img src="icons/full-shot-woman-jumping.jpg" alt="Stats" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/20"></div>
+            </div>
+            <div class="relative z-10 h-full flex flex-col justify-between p-8 pt-20">
+              <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                  Track your progress.
+                </h1>
+                <p class="text-base md:text-lg text-gray-200 max-w-md">
+                  See your streaks, minutes focused, and achievements.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- slide 4: coach -->
+          <div style="width: 25%; height: 100%; position: relative; flex-shrink: 0;">
+            <!-- bg image -->
+            <div class="absolute inset-0">
+              <img src="icons/nathan-dumlao-NXMZxygMw8o-unsplash.jpg" alt="Coach" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/20"></div>
+            </div>
+            <div class="relative z-10 h-full flex flex-col justify-between p-8 pt-20">
+              <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                  Your personal AI coach.
+                </h1>
+                <p class="text-base md:text-lg text-gray-200 max-w-md">
+                  Get guidance whenever you need it.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- bottom controls -->
+      <div class="absolute bottom-0 left-0 right-0 z-40 p-8 pb-12">
+        <!-- dots -->
+        <div class="flex justify-center gap-2 mb-6">
+          <button class="dot w-2 h-2 rounded-full bg-red-500 transition-all" data-dot="0"></button>
+          <button class="dot w-2 h-2 rounded-full bg-white/30 transition-all" data-dot="1"></button>
+          <button class="dot w-2 h-2 rounded-full bg-white/30 transition-all" data-dot="2"></button>
+          <button class="dot w-2 h-2 rounded-full bg-white/30 transition-all" data-dot="3"></button>
+        </div>
+        <!-- next btn -->
+        <button id="next-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl transition-all transform hover:scale-[1.02] text-base">
+          NEXT
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- main app wrapper -->
+  <div id="main-app" class="hidden">
+    <div class="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
+      
+      <!-- header -->
+      <header class="flex justify-between items-center px-6 py-6 mb-6">
+        <div class="flex items-center gap-3">
+          <img src="icons/reshot-icon-brain-SYKDAZJRUC.svg"
+               alt="ProcrastiMate Brain"
+               class="w-8 h-8 drop-shadow-xl" />
+          <h1 class="text-xl font-bold tracking-tight">ProcrastiMate</h1>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm border border-red-500/40 px-2.5 py-1.5 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                 class="w-3.5 h-3.5 text-red-500">
+              <path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/>
+              <path d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1.001A3.75 3.75 0 0012 18z"/>
+            </svg>
+            <span id="total-xp" class="text-sm font-bold text-white">420</span>
+          </div>
+
+          <button class="w-9 h-9 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors" id="settings-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                 class="w-5 h-5">
+              <path fill-rule="evenodd" d="M8.34 1.804A1 1 0 019.32 1h1.36a1 1 0 01.98.804l.295 1.473c.497.144.971.342 1.416.587l1.25-.834a1 1 0 011.262.125l.962.962a1 1 0 01.125 1.262l-.834 1.25c.245.445.443.919.587 1.416l1.473.294a1 1 0 01.804.98v1.361a1 1 0 01-.804.98l-1.473.295a6.95 6.95 0 01-.587 1.416l.834 1.25a1 1 0 01-.125 1.262l-.962.962a1 1 0 01-1.262.125l-1.25-.834a6.953 6.953 0 01-1.416.587l-.294 1.473a1 1 0 01-.98.804H9.32a1 1 0 01-.98-.804l-.295-1.473a6.957 6.957 0 01-1.416-.587l-1.25.834a1 1 0 01-1.262-.125l-.962-.962a1 1 0 01-.125-1.262l.834-1.25a6.957 6.957 0 01-.587-1.416l-1.473-.294A1 1 0 011 10.68V9.32a1 1 0 01.804-.98l1.473-.295c.144-.497.342-.971.587-1.416l-.834-1.25a1 1 0 01.125-1.262l.962-.962A1 1 0 015.38 3.03l1.25.834a6.957 6.957 0 011.416-.587l.294-1.473zM13 10a3 3 0 11-6 0 3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- progress cards -->
+      <div class="mb-8">
+        <div class="flex justify-between gap-4 px-8">
+
+          <div class="relative rounded-2xl p-6 w-[170px] h-[140px] flex-shrink-0 hover-lift cursor-pointer overflow-hidden">
+            <img src="icons/pexels-ezz7-638791.jpg" 
+                 alt="Focused athlete" 
+                 class="absolute inset-0 w-full h-full object-cover object-center z-0 opacity-70">
+            <div class="absolute inset-0 bg-black/60 z-10"></div>
+            <div class="relative z-20">
+              <div class="text-sm font-semibold text-red-500 uppercase tracking-wide mb-3">Focus Streak</div>
+              <div class="text-3xl font-bold mb-2 progress-streak">7</div>
+              <div class="text-sm text-gray-300 mb-4">Days locked in</div>
+            </div>
+          </div>
+
+          <div class="relative rounded-2xl p-6 w-[170px] h-[140px] flex-shrink-0 hover-lift cursor-pointer overflow-hidden">
+            <img src="icons/pexels-jakubzerdzicki-33266833.jpg" 
+                 alt="Notebook with today's tasks" 
+                 class="absolute inset-0 w-full h-full object-cover object-center z-0 opacity-70">
+            <div class="absolute inset-0 bg-black/60 z-10"></div>
+            <div class="relative z-20">
+              <div class="text-sm font-semibold text-red-500 uppercase tracking-wide mb-3">Tasks Crushed</div>
+              <div class="text-3xl font-bold mb-2 progress-tasks">23</div>
+              <div class="text-sm text-gray-300 mb-4">This week</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    <!-- content area -->
+    <div class="px-6 pb-24 mt-2">
+      <section id="tab-focus" class="tab-section active">
+
+        <div class="text-center mb-10 tab-content">
+          <h2 class="text-3xl font-bold mb-3 leading-tight">What are you avoiding?</h2>
+          <p class="text-base text-gray-400 leading-relaxed">Time to face the music</p>
+        </div>
+
+        <div class="mb-6">
+          <input type="text" id="focus-task"
+                 class="w-full glass-card rounded-2xl p-5 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-red-500 transition-all text-base"
+                 placeholder="e.g. Start my project report">
+        </div>
+
+        <!-- timer options -->
+        <div class="flex mb-8" id="timer-options">
+          <button class="timer-option flex-1 glass-card rounded-xl p-3 text-center hover-lift transition-all active ring-2 ring-red-500" data-minutes="25">
+            <div class="text-lg font-bold">25</div>
+            <div class="text-xs text-gray-400">min</div>
+          </button>
+          <button class="timer-option flex-1 glass-card rounded-xl p-3 text-center hover-lift transition-all" data-minutes="45">
+            <div class="text-lg font-bold">45</div>
+            <div class="text-xs text-gray-400">min</div>
+          </button>
+          <button class="timer-option flex-1 glass-card rounded-xl p-3 text-center hover-lift transition-all" data-minutes="60">
+            <div class="text-lg font-bold">60</div>
+            <div class="text-xs text-gray-400">min</div>
+          </button>
+          <button class="timer-option glass-card rounded-xl p-3 text-center hover-lift transition-all" id="custom-timer-btn">
+            <div class="text-lg font-bold flex items-center justify-center mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e3e3e3">
+                <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/>
+              </svg>
+            </div>
+            <div class="text-xs text-gray-400">custom</div>
+          </button>
+        </div>
+
+        <!-- lock in card -->
+        <div class="space-y-4 mb-8" style="margin-top: 1rem;">
+          <div class="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group min-h-[150px] flex items-end hover-lift transition-all"
+               id="lock-in-card"
+               style="background-image: url('./icons/pexels-olly-3756042.jpg'); background-size: cover; background-position: center;">
+            <div class="absolute inset-0 bg-black/50"></div> <!-- overlay -->
+            <div class="absolute top-4 left-4 z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+              </svg>
+            </div>
+            <div class="absolute top-4 right-4 bg-white/20 text-white text-xs px-4 py-1.5 rounded-full font-semibold uppercase tracking-wide z-10">
+              Focus
+            </div>
+            <div class="relative z-10 p-6">
+              <h3 class="font-bold text-xl text-white drop-shadow mb-1">Lock In</h3>
+              <p class="text-base text-white/90 leading-tight">Start your focus session</p>
+            </div>
+          </div>
+
+          <!-- tough love card -->
+          <div class="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group min-h-[150px] flex items-end hover-lift transition-all"
+               id="tough-love-card"
+               style="background-image: url('./icons/pexels-lara-jameson-8898633.jpg'); background-size: cover; background-position: center;">
+            <div class="absolute inset-0 bg-black/50"></div>
+            <div class="absolute top-4 left-4 z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/>
+              </svg>
+            </div>
+            <div class="absolute top-4 right-4 bg-white/20 text-white text-xs px-4 py-1.5 rounded-full font-semibold uppercase tracking-wide z-10">
+              Motivation
+            </div>
+            <div class="p-6 pb-5 z-10">
+              <h3 class="font-bold text-2xl mb-2 drop-shadow-md">Tough Love</h3>
+              <p class="text-lg text-white/90 leading-relaxed drop-shadow-md">Reality check time</p>
+            </div>
+          </div>
+
+          <!-- timer section -->
+          <div class="glass-card rounded-xl p-6 text-center mb-4 hidden" id="timer-section">
+            <div class="text-4xl font-bold text-red-500 mb-4 tabular-nums" id="timer-display">25:00</div>
+            <div class="flex gap-3 justify-center">
+              <button class="primary-bg hover:primary-dark-bg px-6 py-2 rounded-lg font-bold text-sm transition-all ripple-effect" id="start-timer">Start</button>
+              <button class="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded-lg font-bold text-sm transition-all" id="reset-timer">Reset</button>
+            </div>
+            <div class="mt-4 text-sm text-gray-400" id="timer-task-display"></div>
+          </div>
+
+          <div class="glass-card rounded-xl p-4 text-center text-red-400 font-semibold hidden"
+               id="response-message"
+               style="position: relative; z-index: 100; backdrop-filter: none;">
+            <div id="response-text"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- motivation tab -->
+      <section id="tab-motivation" class="tab-section hidden">
+        <div class="text-center mb-6 tab-content">
+          <h2 class="text-2xl font-bold mb-2">Get Motivated</h2>
+          <p class="text-sm text-gray-400">Raw truth from legends</p>
+        </div>
+
+        <div class="relative mb-6">
+          <!-- arrow buttons -->
+          <div class="relative">
+            <button class="absolute -top-8 left-1/2 -translate-x-1/2 z-40 bg-black/90 backdrop-blur-xl rounded-full p-3 hover:bg-red-500/20 transition-all hover:scale-110 border border-gray-700" id="speaker-scroll-up">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2.5" class="w-5 h-5 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+              </svg>
+            </button>
+            <button class="absolute -bottom-8 left-1/2 -translate-x-1/2 z-40 bg-black/90 backdrop-blur-xl rounded-full p-3 hover:bg-red-500/20 transition-all hover:scale-110 border border-gray-700" id="speaker-scroll-down">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2.5" class="w-5 h-5 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <!-- speaker cards -->
+            <div class="h-[500px] overflow-hidden" id="speaker-wrapper" style="margin: 30px 10px;">
+              <div class="h-full overflow-y-auto px-1 custom-scrollbar" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <div class="space-y-3 py-4" id="speaker-cards-vertical">
+                  <!-- david goggins -->
+                  <div class="speaker-card-premium relative group" data-speaker="goggins">
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-red-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-red-500 to-red-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"
+                                   class="w-8 h-8 text-red-400" fill="currentColor">
+                                <path d="M240-80v-170q-39-17-68.5-45.5t-50-64.5q-20.5-36-31-77T80-520q0-158 112-259t288-101q176 0 288 101t112 259q0 42-10.5 83t-31 77q-20.5 36-50 64.5T720-250v170H240Zm80-80h40v-80h80v80h80v-80h80v80h40v-142q38-9 67.5-30t50-50q20.5-29 31.5-64t11-74q0-125-88.5-202.5T480-800q-143 0-231.5 77.5T160-520q0 39 11 74t31.5 64q20.5 29 50.5 50t67 30v142Zm100-200h120l-60-120-60 120Zm-80-80q33 0 56.5-23.5T420-520q0-33-23.5-56.5T340-600q-33 0-56.5 23.5T260-520q0 33 23.5 56.5T340-440Zm280 0q33 0 56.5-23.5T700-520q0-33-23.5-56.5T620-600q-33 0-56.5 23.5T540-520q0 33 23.5 56.5T620-440ZM480-160Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">David Goggins</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Navy SEAL • Can't Hurt Me</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- jocko willink -->
+                  <div class="speaker-card-premium relative group" data-speaker="jocko">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-blue-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"
+                                   class="w-8 h-8 text-blue-400" fill="currentColor">
+                                <path d="M762-96 645-212l-88 88-28-28q-23-23-23-57t23-57l169-169q23-23 57-23t57 23l28 28-88 88 116 117q12 12 12 28t-12 28l-50 50q-12 12-28 12t-28-12Zm118-628L426-270l5 4q23 23 23 57t-23 57l-28 28-88-88L198-96q-12 12-28 12t-28-12l-50-50q-12-12-12-28t12-28l116-117-88-88 28-28q23-23 57-23t57 23l4 5 454-454h160v160ZM334-583l24-23 23-24-23 24-24 23Zm-56 57L80-724v-160h160l198 198-57 56-174-174h-47v47l174 174-56 57Zm92 199 430-430v-47h-47L323-374l47 47Zm0 0-24-23-23-24 23 24 24 23Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Jocko Willink</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Navy SEAL Commander • Discipline</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- gary vaynerchuk -->
+                  <div class="speaker-card-premium relative group" data-speaker="gary">
+                    <div class="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-orange-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                   fill="none" stroke="currentColor" stroke-width="2"
+                                   stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-400">
+                                <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+                                <polyline points="16,7 22,7 22,13"/>
+                                <circle cx="12" cy="12" r="1"/>
+                                <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Gary Vaynerchuk</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">CEO VaynerMedia • Hustle</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- andrew tate -->
+                  <div class="speaker-card-premium relative group" data-speaker="andrew_tate">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-purple-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                   fill="none" stroke="currentColor" stroke-width="2"
+                                   stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400">
+                                <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519L20.69 18.5a1.5 1.5 0 0 1-1.5 1.5h-14.38a1.5 1.5 0 0 1-1.5-1.5L1.019 6.019a.5.5 0 0 1 .798-.519l4.277 3.664a1 1 0 0 0 1.516-.294l2.952-5.604Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Andrew Tate</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">4x Kickboxing Champion • Top G</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+<!-- Kobe Bryant -->
+                  <div class="speaker-card-premium relative group" data-speaker="kobe">
+                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-yellow-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-500 to-purple-600 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-400">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="6"/>
+                                <circle cx="12" cy="12" r="2"/>
+                                <path d="M12 2v4"/>
+                                <path d="M12 18v4"/>
+                                <path d="M2 12h4"/>
+                                <path d="M18 12h4"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Kobe Bryant</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">5× NBA Champion • Mamba Mentality</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Mike Tyson -->
+                  <div class="speaker-card-premium relative group" data-speaker="mike_tyson">
+                    <div class="absolute inset-0 bg-gradient-to-r from-rose-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-rose-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-rose-400" fill="currentColor">
+                                <path d="M320-120q-17 0-28.5-11.5T280-160v-120h400v120q0 17-11.5 28.5T640-120H320Zm440-520v120q0 3-2 8l-30 152q-3 18-16.5 29T680-320H280q-18 0-31.5-11T232-360l-30-152q-2-5-2-8v-240q0-33 23.5-56.5T280-840h320q33 0 56.5 23.5T680-760v120q0-17 11.5-28.5T720-680q17 0 28.5 11.5T760-640ZM306-400h348l26-136v-24h-80v-200H280v224l26 136Zm14-160h240v-120H320v120Zm160-20Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Mike Tyson</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Undisputed Champion • Iron Mike</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+<!-- Les Brown -->
+                  <div class="speaker-card-premium relative group" data-speaker="les_brown">
+                    <div class="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-amber-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-amber-400" fill="currentColor">
+                                <path d="M720-440v-80h160v80H720Zm48 280-128-96 48-64 128 96-48 64Zm-80-480-48-64 128-96 48 64-128 96ZM200-200v-160h-40q-33 0-56.5-23.5T80-440v-80q0-33 23.5-56.5T160-600h160l200-120v480L320-360h-40v160h-80Zm240-182v-196l-98 58H160v80h182l98 58Zm120 36v-268q27 24 43.5 58.5T620-480q0 41-16.5 75.5T560-346ZM300-480Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Les Brown</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Motivational Icon • "Hungry!"</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- CT Fletcher -->
+                  <div class="speaker-card-premium relative group" data-speaker="ct_fletcher">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-emerald-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-green-500 to-green-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-green-400" fill="currentColor">
+                                <path d="m826-585-56-56 30-31-128-128-31 30-57-57 30-31q23-23 57-22.5t57 23.5l129 129q23 23 23 56.5T857-615l-31 30ZM346-104q-23 23-56.5 23T233-104L104-233q-23-23-23-56.5t23-56.5l30-30 57 57-31 30 129 129 30-31 57 57-30 30Zm397-336 57-57-303-303-57 57 303 303ZM463-160l57-58-302-302-58 57 303 303Zm-6-234 110-109-64-64-109 110 63 63Zm63 290q-23 23-57 23t-57-23L104-406q-23-23-23-57t23-57l57-57q23-23 56.5-23t56.5 23l63 63 110-110-63-62q-23-23-23-57t23-57l57-57q23-23 56.5-23t56.5 23l303 303q23 23 23 56.5T577-441l-57 57q-23 23-57 23t-57-23l-62-63-110 110 63 63q23 23 23 56.5T277-161l-57 57Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">CT Fletcher</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">ISYMFS • "It's Still Your Set"</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Eric Thomas -->
+                  <div class="speaker-card-premium relative group" data-speaker="eric_thomas">
+                    <div class="absolute inset-0 bg-gradient-to-r from-sky-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-sky-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-400">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                                <path d="M22 12h-4"/>
+                                <path d="M6 12H2"/>
+                                <path d="M12 2v4"/>
+                                <path d="M12 18v4"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Eric Thomas</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">"When you want to succeed..."</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+<!-- Tony Robbins -->
+                  <div class="speaker-card-premium relative group" data-speaker="tony_robbins">
+                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-indigo-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-purple-400" fill="currentColor">
+                                <path d="M400-40v-360H40l400-400h360v360L400-40Zm240-353 80-80v-247H473l-80 80h247v247ZM480-233l80-80v-247H313l-80 80h247v247Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Tony Robbins</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Peak Performance • UPW</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Jordan Peterson -->
+                  <div class="speaker-card-premium relative group" data-speaker="jordan_peterson">
+                    <div class="absolute inset-0 bg-gradient-to-r from-teal-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-teal-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-400">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                                <path d="M6 8h2"/>
+                                <path d="M6 12h2"/>
+                                <path d="M16 8h2"/>
+                                <path d="M16 12h2"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Jordan Peterson</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">12 Rules • Meaning & Responsibility</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Joe Rogan -->
+                  <div class="speaker-card-premium relative group" data-speaker="joe_rogan">
+                    <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-fuchsia-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-fuchsia-500 to-fuchsia-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-fuchsia-400">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                <line x1="12" x2="12" y1="19" y2="22"/>
+                                <line x1="8" x2="16" y1="22" y2="22"/>
+                                <circle cx="12" cy="9" r="1"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Joe Rogan</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd"/>
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Podcast • Curiosity & Grit</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Andy Frisella -->
+                  <div class="speaker-card-premium relative group" data-speaker="andy_frisella">
+                    <div class="absolute inset-0 bg-gradient-to-r from-violet-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-violet-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-purple-400" fill="currentColor">
+                                <path d="M280-120v-80h160v-124q-49-11-87.5-41.5T296-442q-75-9-125.5-65.5T120-640v-40q0-33 23.5-56.5T200-760h80v-80h400v80h80q33 0 56.5 23.5T840-680v40q0 76-50.5 132.5T664-442q-18 46-56.5 76.5T520-324v124h160v80H280Zm0-408v-152h-80v40q0 38 22 68.5t58 43.5Zm200 128q50 0 85-35t35-85v-240H360v240q0 50 35 85t85 35Zm200-128q36-13 58-43.5t22-68.5v-40h-80v152Zm-200-52Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Andy Frisella</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">75 Hard • No-Excuse Execution</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+<!-- Cam Hanes -->
+                  <div class="speaker-card-premium relative group" data-speaker="cam_hanes">
+                    <div class="absolute inset-0 bg-gradient-to-r from-lime-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-lime-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-lime-500 to-lime-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-lime-400" fill="currentColor">
+                                <path d="m422-232 207-248H469l29-227-185 267h139l-30 208ZM320-80l40-280H160l360-520h80l-40 320h240L400-80h-80Zm151-390Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Cam Hanes</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Endurance • "Keep Hammering"</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Ross Edgley -->
+                  <div class="speaker-card-premium relative group" data-speaker="ross_edgley">
+                    <div class="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-orange-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-orange-400" fill="currentColor">
+                                <path d="M80-120v-80q38 0 68-14.5t65-40.5q30 25 65.5 39.5T347-201q33 0 69-14t65-40q32 28 66 41t68 13q33 0 64.5-13t69.5-41q39 30 69 42.5t62 12.5v80q-35 0-67.5-9.5T749-157q-32 20-66.5 28.5T615-120q-33 0-67.5-8.5T481-157q-29 19-64 28t-70 9q-34 0-68-9t-66-28q-31 18-64.5 27.5T80-120Zm0-180v-80q0-97 37.5-181T220-707q65-62 152.5-97.5T560-840q33 0 65.5 3.5T684-827q-21 32-32.5 67.5T640-693q0 55 39 94t94 39h107v80H773q-89 0-151-62t-62-151q0-14 2-29.5t6-30.5q-74 18-121 76.5T400-540q0 36 11.5 68.5T444-410q8-5 17-11.5t19-13.5q29 26 67 40t68 14q30 0 67-14.5t67-39.5q32 24 63.5 39.5T880-380v80q-35 0-67.5-9.5T749-337q-32 20-65 28.5t-69 8.5q-36 0-72-10t-62-27q-31 19-65 27.5t-69 9.5q-35 1-69-9t-65-28q-31 18-64.5 27.5T80-300Zm265-81h10q5 0 10-1-22-35-33.5-75T320-540q0-81 37-146.5T460-794v44q-62 16-114.5 48.5t-92 78.5Q214-577 190-520.5T161-400q15-9 26-16t26-19q37 27 67 40.5t65 13.5Zm-75-168Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Ross Edgley</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">World-Record Swimmer • Resilience</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Wim Hof -->
+                  <div class="speaker-card-premium relative group" data-speaker="wim_hof">
+                    <div class="absolute inset-0 bg-gradient-to-r from-sky-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-sky-400/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-sky-400">
+                                <line x1="2" x2="22" y1="12" y2="12"/>
+                                <line x1="12" x2="12" y1="2" y2="22"/>
+                                <path d="m20 16-4-4 4-4"/>
+                                <path d="m4 8 4 4-4 4"/>
+                                <path d="m16 4-4 4-4-4"/>
+                                <path d="m8 20 4-4 4 4"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Wim Hof</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">Cold Exposure • Breathwork</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Conor McGregor -->
+                  <div class="speaker-card-premium relative group" data-speaker="conor_mcgregor">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-emerald-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-emerald-400">
+                                <path d="M12.035 17.012a3 3 0 0 0-3-3l-.311-.002a.72.72 0 0 1-.505-1.229l1.195-1.195A2 2 0 0 1 10.828 11H12a2 2 0 0 0 0-4H9.243a3 3 0 0 0-2.122.879l-2.707 2.707A4.83 4.83 0 0 0 3 14a8 8 0 0 0 8 8h2a8 8 0 0 0 8-8V7a2 2 0 1 0-4 0v2a2 2 0 1 0 4 0"/>
+                                <path d="M13.888 9.662A2 2 0 0 0 17 8V5A2 2 0 1 0 13 5"/>
+                                <path d="M9 5A2 2 0 1 0 5 5V10"/>
+                                <path d="M9 7V4A2 2 0 1 1 13 4V7.268"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Conor McGregor</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">UFC Champion • Precision & Timing</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+<!-- Dan Peña -->
+                  <div class="speaker-card-premium relative group" data-speaker="dan_pena">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-emerald-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400">
+                                <line x1="12" x2="12" y1="2" y2="22"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                <circle cx="12" cy="12" r="1"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Dan Peña</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">The $50 Billion Man • QLA</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Grant Cardone -->
+                  <div class="speaker-card-premium relative group" data-speaker="grant_cardone">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-emerald-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-400">
+                                <path d="M6 6l12 12"/>
+                                <path d="M6 18L18 6"/>
+                                <circle cx="12" cy="12" r="8"/>
+                                <path d="M8 12h8"/>
+                                <path d="M12 8v8"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Grant Cardone</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">10X Rule • Real Estate Empire</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Alex Hormozi -->
+                  <div class="speaker-card-premium relative group" data-speaker="alex_hormozi">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-black/90 rounded-2xl p-4 border border-gray-700 group-hover:border-emerald-500/50 transition-all duration-300 backdrop-blur-sm">
+                      <div class="flex items-center gap-4">
+                        <div class="relative flex-shrink-0">
+                          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-700 p-0.5">
+                            <div class="w-full h-full bg-black rounded-xl flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="w-8 h-8 text-cyan-400" fill="currentColor">
+                                <path d="m240-198 79-32q-10-29-18.5-59T287-349l-47 32v119Zm160-42h160q18-40 29-97.5T600-455q0-99-33-187.5T480-779q-54 48-87 136.5T360-455q0 60 11 117.5t29 97.5Zm80-200q-33 0-56.5-23.5T400-520q0-33 23.5-56.5T480-600q33 0 56.5 23.5T560-520q0 33-23.5 56.5T480-440Zm240 242v-119l-47-32q-5 30-13.5 60T641-230l79 32ZM480-881q99 72 149.5 183T680-440l84 56q17 11 26.5 29t9.5 38v237l-199-80H359L160-80v-237q0-20 9.5-38t26.5-29l84-56q0-147 50.5-258T480-881Z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-white text-base truncate">Alex Hormozi</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-blue-400 flex-shrink-0">
+                              <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zM11.47 9.47a.75.75 0 011.06 0l3 3a.75.75 0 11-1.06 1.06l-1.72-1.72V15a.75.75 0 01-1.5 0v-3.19l-1.72 1.72a.75.75 0 11-1.06-1.06l3-3z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider line-clamp-2 leading-tight">$100M Offers • Acquisition.com</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                          <div class="quote-indicator w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-red-500">
+                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                            </svg>
+                          </div>
+                          <span class="text-[9px] text-gray-500 font-medium uppercase">TAP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Display -->
+          <div class="glass-card rounded-2xl p-8 text-center min-h-[180px] flex items-center justify-center mb-6 bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-700/50" id="quote-display">
+            <div class="w-full">
+              <div class="text-lg font-bold leading-relaxed mb-4 text-white" id="quote-text">
+                Tap a speaker above to get motivated
+              </div>
+              <div class="text-xs font-bold text-gray-400 uppercase tracking-wider" id="quote-author"></div>
+            </div>
+          </div>
+
+          <!-- Quote Controls -->
+          <div class="flex gap-3 justify-center hidden" id="quote-controls">
+            <button class="glass-card px-4 py-2 rounded-lg font-bold text-sm hover-lift transition-all" id="new-quote">New Quote</button>
+            <button class="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg font-bold text-sm hover-lift transition-all" id="save-quote">Save</button>
+            <button class="glass-card px-4 py-2 rounded-lg font-bold text-sm hover-lift transition-all" id="mute-quote">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-3.293a.75.75 0 011.28.53v12.026a.75.75 0 01-1.28.53l-4.72-3.293H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Stats Tab -->
+        <section id="tab-stats" class="tab-section hidden">
+          <div class="px-4 pt-6 pb-20 space-y-6">
+
+            <!-- Quick Stats Grid -->
+            <div class="grid grid-cols-2 gap-3">
+              <!-- Total Focus Time Card -->
+              <div class="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/20 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-2xl text-red-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 inline align-middle">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+                    </svg>
+                  </span>
+                  <span class="text-xs text-gray-500">TOTAL</span>
+                </div>
+                <p class="text-2xl font-bold text-white stat-total-time">0h</p>
+                <p class="text-xs text-gray-400">Focus Time</p>
+              </div>
+              <!-- Average Time Per Session Card -->
+              <div class="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-2xl text-blue-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 inline align-middle">
+                      <rect x="3" y="12" width="3" height="6" rx="1" class="fill-current text-blue-400" />
+                      <rect x="9" y="9" width="3" height="9" rx="1" class="fill-current text-blue-400" />
+                      <rect x="15" y="6" width="3" height="12" rx="1" class="fill-current text-blue-400" />
+                    </svg>
+                  </span>
+                  <span class="text-xs text-gray-500">AVG</span>
+                </div>
+                <p class="text-2xl font-bold text-white stat-avg-time">0m</p>
+                <p class="text-xs text-gray-400">Per Session</p>
+              </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="bg-[#1A1A1A] rounded-2xl p-4 shadow-lg">
+              <div class="flex justify-between items-center mb-3">
+                <p class="text-white font-semibold">This Week's Focus</p>
+                <p class="text-xs text-gray-400 stat-week-total">0 min total</p>
+              </div>
+              <canvas id="focus-chart" width="280" height="100"></canvas>
+            </div>
+
+            <!-- Weekly Progress Bars -->
+            <div class="bg-[#1A1A1A] rounded-2xl p-4 shadow-lg">
+              <p class="text-white font-semibold mb-3">Daily Activity</p>
+              <div class="flex justify-between text-gray-400 text-xs mb-2">
+                <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              </div>
+              <div class="flex gap-1" id="weekly-progress">
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+                <div class="flex-1 h-16 bg-gray-800 rounded progress-bar"></div>
+              </div>
+            </div>
+
+            <!-- Personal Records -->
+            <div class="bg-[#1A1A1A] rounded-2xl p-4 shadow-lg">
+              <p class="text-white font-semibold mb-3">Personal Records</p>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-400 text-sm">Longest Session</span>
+                  <span class="text-red-400 font-bold stat-longest-session">0 min</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-400 text-sm">Total Sessions</span>
+                  <span class="text-red-400 font-bold stat-total-sessions">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-400 text-sm">Current Streak</span>
+                  <span class="text-red-400 font-bold stat-current-streak">0 days</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-400 text-sm">Best Day</span>
+                  <span class="text-red-400 font-bold stat-best-day">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-400 text-sm">This Month</span>
+                  <span class="text-red-400 font-bold stat-month-total">0h</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Achievements -->
+            <div>
+              <p class="text-white font-semibold mb-3">Achievements</p>
+              <div class="grid grid-cols-2 gap-3" id="achievements-list">
+                <!-- Will be populated by JS -->
+              </div>
+            </div>
+            
+            <!-- saved quotes will appear here -->
+            <div class="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm border border-gray-700/50">
+              <h3 class="text-lg font-bold text-white mb-4">Saved Quotes</h3>
+              <div id="saved-quotes-list" class="space-y-3">
+              </div>
+            </div>
+
+            <!-- Weekly Goals -->
+            <div class="bg-[#1A1A1A] rounded-2xl p-4 shadow-lg">
+              <div class="flex justify-between items-center mb-3">
+                <p class="text-white font-semibold">Weekly Goals</p>
+                <span class="text-xs text-gray-400">DUE SUNDAY</span>
+              </div>
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input type="text" 
+                         id="weekly-goal-input" 
+                         class="flex-1 bg-gray-800/50 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:ring-1 focus:ring-red-500 focus:outline-none transition-all" 
+                         placeholder="Enter your goal for this week...">
+                  <button class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors" id="save-goal">
+                    SAVE
+                  </button>
+                </div>
+                <div class="text-xs text-green-400 font-semibold hidden" id="goal-saved-text">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 inline align-middle mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  Goal saved!
+                </div>
+
+                <!-- Goals List -->
+                <div id="weekly-goals-list" class="mt-2 space-y-2"></div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Coach Tab -->
+      <section id="tab-coach" class="tab-section hidden">
+        <div class="px-4 pb-32 h-full flex flex-col" style="margin-top: -5rem;">
+          
+          <!-- Chat Header -->
+          <div class="text-center mb-2">
+            <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-white">
+                <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 00-1.032-.211 50.89 50.89 0 00-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 002.433 3.984L7.28 21.53A.75.75 0 016 21v-4.03a48.527 48.527 0 01-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979z" />
+                <path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 001.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0015.75 7.5z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-1">Meet Your AI Coach</h2>
+            <p class="text-xs text-gray-400 mb-2">Your personal productivity & motivation expert</p>
+            <div class="bg-gray-800/50 rounded-lg p-3 text-xs text-gray-300 leading-relaxed">
+               Get motivated •  Set goals •  Stay accountable •  Beat procrastination
+            </div>
+          </div>
+
+          <!-- Chat Messages Area -->
+          <div class="flex-1 bg-[#1A1A1A] rounded-2xl p-4 mb-4 overflow-y-auto" 
+               style="max-height: calc(100vh - 280px);">
+            <div id="chat-messages">
+              <!-- Welcome message -->
+              <div class="chat-message ai-message mb-4">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-sm font-bold">🤖</span>
+                  </div>
+                  <div class="bg-gray-800 rounded-xl p-3 max-w-xs">
+                    <p class="text-white text-sm">Hey! I'm your AI coach. Ready to crush some goals today? Ask me anything about productivity, motivation, or beating procrastination! 🔥</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="flex gap-2 px-2">
+            <input type="text" 
+                   id="chat-input" 
+                   class="flex-1 bg-[#1A1A1A] rounded-xl p-3 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-red-500 transition-all text-sm"
+                   placeholder="Ask your coach...">
+            <button class="bg-red-500 hover:bg-red-600 rounded-xl px-5 py-3 transition-colors" id="send-chat">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-white">
+                <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+<!-- Achievement Popup -->
+    <div id="achievement-popup" class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] hidden pointer-events-none">
+      <div class="relative flex items-center gap-4 px-6 py-4 bg-black/80 backdrop-blur-xl border border-red-500/30 shadow-2xl rounded-2xl"
+           style="box-shadow: 0 8px 24px 2px rgba(255, 38, 38, 0.25), 0 1.5px 8px 0 rgba(0,0,0,0.22);">
+        <span class="text-3xl" id="achievement-icon">🏆</span>
+        <div>
+          <div class="font-semibold text-base tracking-tight text-white" id="achievement-title">Achievement Unlocked!</div>
+          <div class="text-xs text-red-300 mt-0.5" id="achievement-desc">Focus Master</div>
+        </div>
+        <span class="absolute -top-2 -right-2 text-red-400/90 pointer-events-auto cursor-pointer hidden" id="popup-close">&times;</span>
+      </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="fixed inset-y-0 right-0 w-80 max-w-full bg-black border-l border-gray-800 settings-panel z-50 overflow-y-auto" id="settings-panel">
+      <div class="sticky top-0 bg-black border-b border-gray-800 p-4 z-10">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-white">Settings</h2>
+          <button class="p-2 hover:bg-gray-800 rounded-lg transition-colors" id="close-settings">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-6">
+        <!-- Profile Section -->
+        <div class="bg-gray-900 rounded-xl p-4">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Profile</h3>
+          <div class="text-white font-semibold" id="user-email">Loading...</div>
+          <div class="text-xs text-gray-500 mt-1">Member since 2024</div>
+        </div>
+
+        <!-- Preferences -->
+        <div>
+          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Preferences</h3>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 bg-gray-900 rounded-lg">
+              <span class="text-sm text-white">Sound Effects</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-500">Off</span>
+                <input type="checkbox" class="toggle" id="timer-sound" checked>
+                <span class="text-xs text-gray-500">On</span>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 bg-gray-900 rounded-lg">
+              <span class="text-sm text-white">Notifications</span>
+              <input type="checkbox" class="toggle" id="achievement-alerts" checked>
+            </label>
+          </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div>
+          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Account</h3>
+          <div class="space-y-2">
+            <button class="w-full p-3 bg-gray-900 hover:bg-gray-800 rounded-lg text-sm text-white text-left transition-colors" id="export-data">
+              Export My Data
+            </button>
+            <button class="w-full p-3 bg-gray-900 hover:bg-gray-800 rounded-lg text-sm text-white text-left transition-colors" id="change-password-btn">
+              Change Password
+            </button>
+            <button class="w-full p-3 bg-red-900/20 hover:bg-red-900/30 border border-red-500/20 rounded-lg text-sm text-red-400 text-left transition-colors" id="reset-data">
+              Reset All Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Sign Out -->
+        <div class="pt-4 border-t border-gray-800">
+          <button class="w-full p-3 bg-gray-900 hover:bg-red-900/20 rounded-lg text-sm text-white transition-colors" id="logout-btn">
+            Sign Out
+          </button>
+        </div>
+
+        <!-- App Info -->
+        <div class="text-center pt-4">
+          <p class="text-xs text-gray-500">ProcrastiMate v1.0.0</p>
+          <p class="text-xs text-gray-600">© 2024 Beast Mode Inc.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-6" id="modal-overlay">
+      <div class="glass-card rounded-xl p-6 max-w-xs w-full text-center transform scale-95 transition-transform">
+        <div class="flex items-center justify-center gap-2 text-xl font-bold text-red-500 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame-icon lucide-flame animate-pulse">
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+          </svg>
+          <span>Tough Love Time</span>
+        </div>
+        <div class="text-base font-bold text-red-400 mb-6 leading-relaxed" id="modal-message">
+          Time for some reality...
+        </div>
+        <button class="w-full primary-bg hover:primary-dark-bg py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2" id="modal-close">
+          I'm Ready 
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-biceps-flexed-icon lucide-biceps-flexed">
+            <path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/>
+            <path d="M15 14a5 5 0 0 0-7.584 2"/>
+            <path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Custom Timer Modal -->
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-6" id="custom-timer-modal">
+      <div class="glass-card rounded-xl p-6 max-w-xs w-full">
+        <h3 class="text-lg font-bold text-white mb-4">Set Custom Time</h3>
+        <div class="flex gap-2 mb-4">
+          <input type="number" 
+                 id="custom-hours" 
+                 min="0" max="3" 
+                 placeholder="0" 
+                 class="flex-1 bg-gray-800 rounded-lg p-3 text-white text-center">
+          <span class="text-white self-center">h</span>
+          <input type="number" 
+                 id="custom-minutes" 
+                 min="0" max="59" 
+                 placeholder="25" 
+                 class="flex-1 bg-gray-800 rounded-lg p-3 text-white text-center">
+          <span class="text-white self-center">m</span>
+        </div>
+        <div class="flex gap-3">
+          <button class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg font-bold" id="cancel-custom">Cancel</button>
+          <button class="flex-1 bg-red-500 hover:bg-red-600 py-2 rounded-lg font-bold" id="set-custom">Set Timer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Timer Page -->
+  <div class="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white z-40 hidden transition-all duration-500 ease-in-out transform translate-y-full" id="timer-page">
+    
+    <div class="h-full flex flex-col">
+      <!-- Header -->
+      <header class="flex justify-between items-center px-6 pt-6 pb-2">
+        <button class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors" id="back-to-focus">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span class="font-medium">Back</span>
+        </button>
+        <div class="text-xs font-semibold text-gray-400 tracking-wide uppercase" id="timer-session-info">25 min session</div>
+      </header>
+
+      <!-- Main Timer Content -->
+      <div class="flex-1 flex flex-col items-center justify-center px-4">
+        <!-- ProcrastiMate Brain Icon -->
+        <div class="flex justify-center mb-2 mt-[-10rem]">
+          <img src="icons/reshot-icon-brain-SYKDAZJRUC.svg"
+               alt="ProcrastiMate Brain"
+               class="w-12 h-12 drop-shadow-xl animate-pulse" />
+        </div>
+
+        <!-- Task Title -->
+        <div class="text-center mb-2">
+          <div class="flex items-center justify-center gap-3 mb-2">
+            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <span class="text-xs text-gray-400 font-semibold uppercase tracking-widest">FOCUS SESSION</span>
+            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          </div>
+          <div class="text-lg text-white font-medium tracking-wide" id="timer-current-task">Your task</div>
+        </div>
+
+        <div class="flex flex-col items-center m-0">
+          <!-- Timer Display -->
+          <div class="flex items-end gap-2 mb-6">
+            <div class="bg-[#18181b] rounded-xl flex flex-col px-3 py-1 shadow border border-red-500/20">
+              <span class="countdown font-mono text-4xl font-extrabold text-red-500 timer-flip">
+                <span id="timer-minutes" aria-live="polite">25</span>
+              </span>
+              <span class="text-[10px] text-gray-400 font-medium text-center mt-1">min</span>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center self-center" style="position: relative; top: -12px;">
+              <div class="w-2 h-2 bg-red-500 rounded-full mb-1 animate-pulse"></div>
+              <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+            </div>
+            
+            <div class="bg-[#18181b] rounded-xl flex flex-col px-3 py-1 shadow border border-red-500/20">
+              <span class="countdown font-mono text-4xl font-extrabold text-red-500 timer-flip">
+                <span id="timer-seconds" aria-live="polite">00</span>
+              </span>
+              <span class="text-[10px] text-gray-400 font-medium text-center mt-1">sec</span>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="flex gap-3 mb-8">
+            <button class="bg-red-500 hover:bg-red-600 px-8 py-2 rounded-lg font-bold text-base shadow ripple-effect" id="main-start-timer">
+              <svg class="inline-block w-4 h-4 mr-2 -mt-1" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              Start
+            </button>
+            <button class="bg-[#19191c] hover:bg-red-900 px-6 py-2 rounded-lg font-bold text-base text-red-400 border border-red-700 shadow" id="main-reset-timer">
+              <svg class="inline-block w-5 h-5 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/>
+              </svg>
+              Reset
+            </button>
+          </div>
+
+          <!-- Session Stats -->
+          <div class="grid grid-cols-3 gap-3 w-full max-w-sm mx-auto">
+            <div class="bg-[#19191c] rounded-xl p-4 flex flex-col items-center border border-red-700/30 hover:border-red-500/50 transition-all">
+              <div class="flex items-center gap-2 mb-1">
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/>
+                </svg>
+                <span class="text-lg font-bold text-red-400" id="sessions-today">0</span>
+              </div>
+              <span class="text-xs text-gray-500 font-medium">Today</span>
+            </div>
+            
+            <div class="bg-[#19191c] rounded-xl p-4 flex flex-col items-center border border-red-700/30 hover:border-red-500/50 transition-all">
+              <div class="flex items-center gap-2 mb-1">
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/>
+                </svg>
+                <span class="text-lg font-bold text-red-400" id="focus-streak">7</span>
+              </div>
+              <span class="text-xs text-gray-500 font-medium">Streak</span>
+            </div>
+            
+            <div class="bg-[#19191c] rounded-xl p-4 flex flex-col items-center border border-red-700/30 hover:border-red-500/50 transition-all">
+              <div class="flex items-center gap-2 mb-1">
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5Z"/>
+                </svg>
+                <span class="text-lg font-bold text-red-400" id="total-xp-timer">420</span>
+              </div>
+              <span class="text-xs text-gray-500 font-medium">GRIT</span>
+            </div>
+          </div>
+
+          <!-- Ambient Sound Controls -->
+          <div class="flex gap-2 justify-center mt-6">
+            <button class="ambient-btn glass-card rounded-lg px-3 py-2 text-xs flex items-center gap-1" data-sound="none">
+              <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#e3e3e3">
+                <path d="M792-56 671-177q-25 16-53 27.5T560-131v-82q14-5 27.5-10t25.5-12L480-368v208L280-360H120v-240h128L56-792l56-56 736 736-56 56Zm-8-232-58-58q17-31 25.5-65t8.5-70q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 53-14.5 102T784-288ZM650-422l-90-90v-130q47 22 73.5 66t26.5 96q0 15-2.5 29.5T650-422ZM480-592 376-696l104-104v208Zm-80 238v-94l-72-72H200v80h114l86 86Zm-36-130Z"/>
+              </svg>
+              OFF
+            </button>
+            <button class="ambient-btn glass-card rounded-lg px-3 py-2 text-xs flex items-center gap-1" data-sound="rain">
+              <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#e3e3e3">
+                <path d="M558-84q-15 8-30.5 2.5T504-102l-60-120q-8-15-2.5-30.5T462-276q15-8 30.5-2.5T516-258l60 120q8 15 2.5 30.5T558-84Zm240 0q-15 8-30.5 2.5T744-102l-60-120q-8-15-2.5-30.5T702-276q15-8 30.5-2.5T756-258l60 120q8 15 2.5 30.5T798-84Zm-480 0q-15 8-30.5 2.5T264-102l-60-120q-8-15-2.5-30.5T222-276q15-8 30.5-2.5T276-258l60 120q8 15 2.5 30.5T318-84Zm-18-236q-91 0-155.5-64.5T80-540q0-83 55-145t136-73q32-57 87.5-89.5T480-880q90 0 156.5 57.5T717-679q69 6 116 57t47 122q0 75-52.5 127.5T700-320H300Zm0-80h400q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-40q0-66-47-113t-113-47q-48 0-87.5 26T333-704l-10 24h-25q-57 2-97.5 42.5T160-540q0 58 41 99t99 41Zm180-200Z"/>
+              </svg>
+              RAIN
+            </button>
+            <button class="ambient-btn glass-card rounded-lg px-3 py-2 text-xs flex items-center gap-1" data-sound="focus">
+              <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#e3e3e3">
+                <path d="M360-120H200q-33 0-56.5-23.5T120-200v-280q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-480v280q0 33-23.5 56.5T760-120H600v-320h160v-40q0-117-81.5-198.5T480-760q-117 0-198.5 81.5T200-480v40h160v320Zm-80-240h-80v160h80v-160Zm400 0v160h80v-160h-80Zm-400 0h-80 80Zm400 0h80-80Z"/>
+              </svg>
+              FOCUS
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-gray-800">
+    <div class="grid grid-cols-4 py-4 px-2 max-w-md mx-auto">
+      <button class="nav-item flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-all text-red-500" data-tab="focus">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor" class="w-6 h-6">
+          <path d="M512 320C512 214 426 128 320 128C214 128 128 214 128 320C128 426 214 512 320 512C426 512 512 426 512 320zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM320 400C364.2 400 400 364.2 400 320C400 275.8 364.2 240 320 240C275.8 240 240 275.8 240 320C240 364.2 275.8 400 320 400zM320 176C399.5 176 464 240.5 464 320C464 399.5 399.5 464 320 464C240.5 464 176 399.5 176 320C176 240.5 240.5 176 320 176zM288 320C288 302.3 302.3 288 320 288C337.7 288 352 302.3 352 320C352 337.7 337.7 352 320 352C302.3 352 288 337.7 288 320z"/>
+        </svg>
+        <span class="text-xs font-semibold">Focus</span>
+      </button>
+
+      <button class="nav-item flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-all text-gray-400 hover:text-white" data-tab="motivation">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor" class="w-6 h-6">
+          <path d="M434.8 54.1C446.7 62.7 451.1 78.3 445.7 91.9L367.3 288L512 288C525.5 288 537.5 296.4 542.1 309.1C546.7 321.8 542.8 336 532.5 344.6L244.5 584.6C233.2 594 217.1 594.5 205.2 585.9C193.3 577.3 188.9 561.7 194.3 548.1L272.7 352L128 352C114.5 352 102.5 343.6 97.9 330.9C93.3 318.2 97.2 304 107.5 295.4L395.5 55.4C406.8 46 422.9 45.5 434.8 54.1z"/>
+        </svg>
+        <span class="text-xs font-semibold">Motivation</span>
+      </button>
+
+      <button class="nav-item flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-all text-gray-400 hover:text-white" data-tab="stats">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor" class="w-6 h-6">
+          <path d="M256 144C256 117.5 277.5 96 304 96L336 96C362.5 96 384 117.5 384 144L384 496C384 522.5 362.5 544 336 544L304 544C277.5 544 256 522.5 256 496L256 144zM64 336C64 309.5 85.5 288 112 288L144 288C170.5 288 192 309.5 192 336L192 496C192 522.5 170.5 544 144 544L112 544C85.5 544 64 522.5 64 496L64 336zM496 160L528 160C554.5 160 576 181.5 576 208L576 496C576 522.5 554.5 544 528 544L496 544C469.5 544 448 522.5 448 496L448 208C448 181.5 469.5 160 496 160z"/>
+        </svg>
+        <span class="text-xs font-semibold">Stats</span>
+      </button>
+
+      <button class="nav-item flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-all text-gray-400 hover:text-white" data-tab="coach">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+          <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 00-1.032-.211 50.89 50.89 0 00-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 002.433 3.984L7.28 21.53A.75.75 0 016 21v-4.03a48.527 48.527 0 01-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979z" />
+          <path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 001.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0015.75 7.5z" />
+        </svg>
+        <span class="text-xs font-semibold">Coach</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Floating Quick Start -->
+  <button class="fixed bottom-24 right-6 w-14 h-14 bg-red-500 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 transition-all hover:scale-110 pulse-ring z-40" id="fab-timer">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-6 h-6">
+      <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
+    </svg>
+  </button>
+
+  <script src="script.js"></script>
+</div>
+</body>
+</html>
