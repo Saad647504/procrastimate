@@ -73,7 +73,8 @@ Nothing fancy, just what works:
   <a href="https://play.google.com/store/apps/details?id=com.procrastimate.app">
    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" height="50"/>
   </a>
-## 💻 Run Locally
+
+### 💻 Run Locally
 ```bash
 ### Clone the repo
 git clone https://github.com/Saad04040404/procrastimate.git
