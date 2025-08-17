@@ -172,7 +172,7 @@ MIT - Take it, modify it, whatever. Just actually use it to get work done.
 ## Contact
 Built by yours truly Saad Bachaoui
 - Struggling with procrastination since: Forever
-- Finally doing something about it: 2024
+- Finally doing something about it: 2025
 - https://www.linkedin.com/in/saad-bachaoui-b1323633b/
 - saabachaoui@gamil.com
 
