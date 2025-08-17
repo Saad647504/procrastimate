@@ -72,16 +72,16 @@ Nothing fancy, just what works:
   <a href="https://play.google.com/store/apps/details?id=com.procrastimate.app">
    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" height="50"/>
   </a>
-### 💻 Run Locally
+## 💻 Run Locally
 ```bash
-# Clone the repo
+### Clone the repo
 git clone https://github.com/Saad04040404/procrastimate.git
 
-# Run locally
+### Run locally
 python3 -m http.server 8000
-# Open http://localhost:8000
+### Open http://localhost:8000
 
-# Or just open index.html directly
+### Or just open index.html directly
 
 ## Android 📲
 Coming soon on Google Play Store (in review)
