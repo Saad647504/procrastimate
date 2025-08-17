@@ -75,7 +75,6 @@ Nothing fancy, just what works:
   </a>
 *Currently in review - check back soon or use web version above*
 ### 💻 Run Locally
-```bash
 ### Clone the repo
 git clone https://github.com/Saad04040404/procrastimate.git
 
