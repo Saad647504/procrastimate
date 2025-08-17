@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.vscode/
+
+# Build folders
+android/
+build/
+app/
+.vercel/
+
+# Generated files
+*.aab
+*.apk
+*.jks
+*.keystore
+
+# Config duplicates
+twa-manifest.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.log
+
+# Keep only www folder contents
+
