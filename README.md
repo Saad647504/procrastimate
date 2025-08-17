@@ -73,7 +73,6 @@ Nothing fancy, just what works:
   <a href="https://play.google.com/store/apps/details?id=com.procrastimate.app">
    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" height="50"/>
   </a>
-*Currently in review - check back soon or use web version above*
 
 ### 💻 Run Locally
 
