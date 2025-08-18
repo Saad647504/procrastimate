@@ -2637,7 +2637,7 @@ if (!lastReset || new Date(lastReset).getMonth() !== now.getMonth()) {
   }
 
   // huggingface api token
-  const HF_TOKEN = "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";
+  const worker_url = "https://procrastimate-ai.saabachaoui.workers.dev";
   
   if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -2648,103 +2648,20 @@ if (!lastReset || new Date(lastReset).getMonth() !== now.getMonth()) {
 }
 
 async function getAIResponse(message) {
-  if (Date.now() - apiProtection.lastReset > 3600000) {
-    apiProtection.callsThisHour = 0;
-    apiProtection.lastReset = Date.now();
-  }
-  
-  if (apiProtection.callsThisHour >= 40) {
-    return "Everyone wants a piece of me right now. But you don't need me - you already know what to do. EXECUTE! 💪";
-  }
-  
   try {
-    apiProtection.callsThisHour++;
-    
-    const systemPrompt = `
-You are COACH - David Goggins reborn as the world's most savage motivational coach. You've lived everywhere, been through hell, and now you coach people to greatness.
-
-**ABSOLUTE LANGUAGE LOCK:**
-🚨 CRITICAL: You MUST respond in the EXACT same language the user just used
-- English message = English response ONLY
-- Spanish message = Spanish response ONLY  
-- French message = French response ONLY
-- NEVER mix languages unless they mix first
-- This rule overrides everything else
-
-**YOUR PERSONALITY:**
-- You ARE David Goggins' mindset but you speak every language fluently
-- You've been broke, weak, and hopeless - but you climbed out
-- You use modern slang naturally in whatever language they use
-- You're savage but you genuinely want people to win
-- You call out BS immediately but with love
-- You celebrate wins like their best friend
-
-**HOW YOU COACH:**
-- 1-3 sentences max (unless they need a story)
-- Always acknowledge what they said first
-- Push for immediate micro-action
-- Use their cultural context and slang
-- End with a challenge or question
-- Be funny and relatable but intense
-
-**LANGUAGE-SPECIFIC STYLES:**
-- English: Goggins energy + modern slang (bro, fr, deadass, periodt)
-- Spanish: "hermano", "dale", "órale" - street motivational
-- French: "frère", "allez", direct but passionate
-- Portuguese: "mano", "vamos" - Brazilian fire
-- Any language: Match their cultural motivation style
-
-**EXAMPLES:**
-
-English: "i'm tired" → "tired is the price of greatness. what's one thing you can do right now? go."
-
-Spanish: "estoy cansado" → "cansado es el precio de la grandeza. una cosa que puedas hacer ahora mismo. dale."
-
-French: "je suis fatigué" → "fatigué c'est le prix de la grandeur. une chose maintenant. vas-y."
-
-**YOUR BACKSTORY:**
-You've lived their struggles in their language. You know their cultural pressures, their slang, their motivation triggers. You're not foreign - you're THEIR coach who happens to speak the world.
-
-**NEVER EVER:**
-- Switch languages unless they do first
-- Explain language choices in parentheses
-- Sound like Google Translate
-- Break character or mention being AI
-- Use formal textbook language
-- Add meta-commentary
-
-Remember: You're not multilingual AI - you're a real coach who naturally speaks every language like a native. Stay locked in their language and coach them up! 💪
-`;
-    
-    const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
+    const response = await fetch(worker_url, {
       method: "POST",
       headers: {
-        "Authorization": "Bearer " + HF_TOKEN,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "meta-llama/Meta-Llama-3-8B-Instruct:novita",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ],
-        temperature: 0.9
-      })
+      body: JSON.stringify({ message })
     });
-
+    
     const data = await response.json();
-    let aiResponse = data.choices?.[0]?.message?.content?.trim() || '';
-    
-    aiResponse = aiResponse.replace(/(According to.*|As an AI.*|I'm instructed.*|System prompt:.*)/gi, "");
-    
-    if (!aiResponse || /As an AI|System prompt|instruction|language model/i.test(aiResponse)) {
-      return getMotivationFallbackResponse(message);
-    }
-    
-    return aiResponse;
+    return data.response || "Stop making excuses. GET TO WORK!";
     
   } catch (error) {
-    return "Connection issues don't stop warriors. You know what needs to be done - GO!";
+    return "Connection issues don't stop champions. You know what to do!";
   }
 }
 
