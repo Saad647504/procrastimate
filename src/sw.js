@@ -5,7 +5,7 @@ const urlsToCache = [
   '/script.js',
   '/style.css',
   '/manifest.json',
-  '/icons/reshot-icon-brain-SYKDAZJRUC.svg',
+  '../assets/reshot-icon-brain-SYKDAZJRUC.svg',
   'https://cdn.tailwindcss.com/3.4.0',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js',

@@ -37,10 +37,10 @@ window.addEventListener('load', () => {
 
 // preload images
 const onboardingImages = [
-  'icons/roman-denisenko-OAx0oQ8I5a0-unsplash.jpg',
-  'icons/eduardo-cano-photo-co-9xL_8KCEQqE-unsplash.jpg',
-  'icons/full-shot-woman-jumping.jpg',
-  'icons/nathan-dumlao-NXMZxygMw8o-unsplash.jpg'
+  '../assets/roman-denisenko-OAx0oQ8I5a0-unsplash.jpg',
+  '../assets/eduardo-cano-photo-co-9xL_8KCEQqE-unsplash.jpg',
+  '../assets/full-shot-woman-jumping.jpg',
+  '../assets/nathan-dumlao-NXMZxygMw8o-unsplash.jpg'
 ];
 
 onboardingImages.forEach(src => {
@@ -49,7 +49,7 @@ onboardingImages.forEach(src => {
 });
 
 const slide4Img = new Image();
-slide4Img.src = 'icons/nathan-dumlao-NXMZxygMw8o-unsplash.jpg';
+slide4Img.src = '../assets/nathan-dumlao-NXMZxygMw8o-unsplash.jpg';
 slide4Img.onload = () => {
   console.log('Slide 4 image preloaded');
 };
@@ -1322,140 +1322,142 @@ function formatFocusTime(minutes) {
     setTimeout(() => particle.remove(), 2000);
   }
 
-function playSound(type) {
-  const timerSoundEnabled = document.getElementById('timer-sound')?.checked ?? true;
-  
-  // If sound effects are OFF, don't play ANY sounds
-  if (!timerSoundEnabled) return;
-  
-  try {
-    const audio = new Audio();
-    audio.volume = 0.3;
+  function playSound(type) {
+    const timerSoundEnabled = document.getElementById('timer-sound')?.checked ?? true;
     
-    switch(type) {
-      case 'click':
-        audio.src = 'sounds/click.mp3';
-        break;
-      case 'complete':
-        audio.src = 'sounds/complete.mp3';
-        break;
-      case 'tick':
-        audio.src = 'sounds/click.mp3';
-        break;
-      case 'achievement':
-        audio.src = 'sounds/complete.mp3';
-        break;
-      case 'warning':
-        audio.src = 'sounds/click.mp3';
-        break;
-    }
+    // If sound effects are OFF, don't play ANY sounds
+    if (!timerSoundEnabled) return;
     
-    if (audio.src) {
-      audio.play().catch(e => console.log('Audio blocked:', e));
+    try {
+      const audio = new Audio();
+      audio.volume = 0.3;
+      
+      switch(type) {
+        case 'click':
+          audio.src = 'sounds/click.mp3';
+          break;
+        case 'complete':
+          audio.src = 'sounds/complete.mp3';
+          break;
+        case 'tick':
+          audio.src = 'sounds/click.mp3';
+          break;
+        case 'achievement':
+          audio.src = 'sounds/complete.mp3';
+          break;
+        case 'warning':
+          audio.src = 'sounds/click.mp3';
+          break;
+      }
+      
+      if (audio.src) {
+        audio.play().catch(e => console.log('Audio blocked:', e));
+      }
+    } catch (error) {
+      console.log('Sound error:', error);
     }
-  } catch (error) {
-    console.log('Sound error:', error);
   }
-}
 // ambient sound system
   let ambientAudio = null;
   let audioContext = null;
   let oscillator = null;
   let gainNode = null;
 
-function playAmbient(type) {
-  // Stop all current sounds
-  if (window.ambientAudio1) {
-    window.ambientAudio1.pause();
-    window.ambientAudio1 = null;
-  }
-  if (window.ambientAudio2) {
-    window.ambientAudio2.pause();
-    window.ambientAudio2 = null;
-  }
   
-  if (type === 'none') {
+
+  function playAmbient(type) {
+    // Stop all current sounds
+    if (window.ambientAudio1) {
+      window.ambientAudio1.pause();
+      window.ambientAudio1 = null;
+    }
+    if (window.ambientAudio2) {
+      window.ambientAudio2.pause();
+      window.ambientAudio2 = null;
+    }
+    
+    if (type === 'none') {
+      document.querySelectorAll('.ambient-btn').forEach(btn => {
+        btn.classList.remove('bg-red-500', 'text-white');
+      });
+      return;
+    }
+    
+    // Create TWO audio elements for crossfading
+    const audio1 = new Audio();
+    const audio2 = new Audio();
+    
+    if (type === 'rain') {
+      audio1.src = 'sounds/rain.mp3';
+      audio2.src = 'sounds/rain.mp3';
+    } else if (type === 'focus') {
+      audio1.src = 'sounds/focus.mp3';
+      audio2.src = 'sounds/focus.mp3';
+    }
+    
+    audio1.volume = 0.15;
+    audio2.volume = 0;
+    
+    // Start first audio
+    audio1.play().catch(e => console.log('Audio1 error:', e));
+    
+    // Set up crossfade loop
+    let currentAudio = audio1;
+    let nextAudio = audio2;
+    
+    const crossfadeTime = 2000; // 2 second crossfade
+    
+    function setupCrossfade(current, next) {
+      // When current audio is near the end, start fading
+      current.addEventListener('timeupdate', function handler() {
+        const timeLeft = (current.duration - current.currentTime) * 1000;
+        
+        if (timeLeft <= crossfadeTime && next.paused) {
+          // Start the next audio
+          next.currentTime = 0;
+          next.volume = 0;
+          next.play().catch(e => console.log('Crossfade error:', e));
+          
+          // Fade out current, fade in next
+          let fadeProgress = 0;
+          const fadeInterval = setInterval(() => {
+            fadeProgress += 50;
+            const fadePercent = fadeProgress / crossfadeTime;
+            
+            current.volume = Math.max(0, 0.15 * (1 - fadePercent));
+            next.volume = Math.min(0.15, 0.15 * fadePercent);
+            
+            if (fadeProgress >= crossfadeTime) {
+              clearInterval(fadeInterval);
+              current.pause();
+              current.removeEventListener('timeupdate', handler);
+              
+              // Swap references
+              const temp = currentAudio;
+              currentAudio = nextAudio;
+              nextAudio = temp;
+              
+              // Setup next crossfade
+              setupCrossfade(currentAudio, nextAudio);
+            }
+          }, 50);
+        }
+      });
+    }
+    
+    setupCrossfade(audio1, audio2);
+    
+    window.ambientAudio1 = audio1;
+    window.ambientAudio2 = audio2;
+    
+    // Update button states
     document.querySelectorAll('.ambient-btn').forEach(btn => {
       btn.classList.remove('bg-red-500', 'text-white');
-    });
-    return;
-  }
-  
-  // Create TWO audio elements for crossfading
-  const audio1 = new Audio();
-  const audio2 = new Audio();
-  
-  if (type === 'rain') {
-    audio1.src = 'sounds/rain.mp3';
-    audio2.src = 'sounds/rain.mp3';
-  } else if (type === 'focus') {
-    audio1.src = 'sounds/focus.mp3';
-    audio2.src = 'sounds/focus.mp3';
-  }
-  
-  audio1.volume = 0.15;
-  audio2.volume = 0;
-  
-  // Start first audio
-  audio1.play().catch(e => console.log('Audio1 error:', e));
-  
-  // Set up crossfade loop
-  let currentAudio = audio1;
-  let nextAudio = audio2;
-  
-  const crossfadeTime = 2000; // 2 second crossfade
-  
-  function setupCrossfade(current, next) {
-    // When current audio is near the end, start fading
-    current.addEventListener('timeupdate', function handler() {
-      const timeLeft = (current.duration - current.currentTime) * 1000;
-      
-      if (timeLeft <= crossfadeTime && next.paused) {
-        // Start the next audio
-        next.currentTime = 0;
-        next.volume = 0;
-        next.play().catch(e => console.log('Crossfade error:', e));
-        
-        // Fade out current, fade in next
-        let fadeProgress = 0;
-        const fadeInterval = setInterval(() => {
-          fadeProgress += 50;
-          const fadePercent = fadeProgress / crossfadeTime;
-          
-          current.volume = Math.max(0, 0.15 * (1 - fadePercent));
-          next.volume = Math.min(0.15, 0.15 * fadePercent);
-          
-          if (fadeProgress >= crossfadeTime) {
-            clearInterval(fadeInterval);
-            current.pause();
-            current.removeEventListener('timeupdate', handler);
-            
-            // Swap references
-            const temp = currentAudio;
-            currentAudio = nextAudio;
-            nextAudio = temp;
-            
-            // Setup next crossfade
-            setupCrossfade(currentAudio, nextAudio);
-          }
-        }, 50);
+      if (btn.dataset.sound === type) {
+        btn.classList.add('bg-red-500', 'text-white');
       }
     });
   }
-  
-  setupCrossfade(audio1, audio2);
-  
-  window.ambientAudio1 = audio1;
-  window.ambientAudio2 = audio2;
-  
-  // Update button states
-  document.querySelectorAll('.ambient-btn').forEach(btn => {
-    btn.classList.remove('bg-red-500', 'text-white');
-    if (btn.dataset.sound === type) {
-      btn.classList.add('bg-red-500', 'text-white');
-    }
-  });
-}
 
   document.querySelectorAll('.ambient-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2649,20 +2651,37 @@ if (!lastReset || new Date(lastReset).getMonth() !== now.getMonth()) {
 
 async function getAIResponse(message) {
   try {
+    // Better prompt that works for any language
+    const prompt = `You are a tough motivational coach. Reply in the SAME language the user wrote in. Keep it under 50 words. Be direct and motivating. User says: ${message}`;
+    
     const response = await fetch(worker_url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        message: prompt,
+        temperature: 0.8,
+        max_tokens: 100
+      })
     });
     
     const data = await response.json();
-    return data.response || "Stop making excuses. GET TO WORK!";
+    return data.response || getUniversalFallback();
     
   } catch (error) {
-    return "Connection issues don't stop champions. You know what to do!";
+    return getUniversalFallback();
   }
+}
+
+// Universal fallback (works offline)
+function getUniversalFallback() {
+  const responses = [
+    "NO MORE EXCUSES! GET TO WORK! 💪",
+    "STOP THINKING. START DOING! 🔥",
+    "YOUR COMPETITION ISN'T RESTING! ⚡",
+    "DISCIPLINE > MOTIVATION! LET'S GO! 🚀",
+    "5-4-3-2-1 GO! ACTION NOW! 💯"
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
 }
 
   function getMotivationFallbackResponse(message) {
