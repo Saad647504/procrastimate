@@ -1,11 +1,15 @@
-const CACHE_NAME = 'procrastimate-v1';
+const CACHE_NAME = 'procrastimate-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/script.js',
   '/style.css',
   '/manifest.json',
-  'assets/reshot-icon-brain-SYKDAZJRUC.svg',
+  '/assets/reshot-icon-brain-SYKDAZJRUC.svg',
+  '/assets/sounds/click.mp3',
+  '/assets/sounds/complete.mp3',
+  '/assets/sounds/focus.mp3',
+  '/assets/sounds/rain.mp3',
   'https://cdn.tailwindcss.com/3.4.0',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js',

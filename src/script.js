@@ -1334,19 +1334,19 @@ function formatFocusTime(minutes) {
       
       switch(type) {
         case 'click':
-          audio.src = 'sounds/click.mp3';
+          audio.src = 'assets/sounds/click.mp3';
           break;
         case 'complete':
-          audio.src = 'sounds/complete.mp3';
+          audio.src = 'assets/sounds/complete.mp3';
           break;
         case 'tick':
-          audio.src = 'sounds/click.mp3';
+          audio.src = 'assets/sounds/click.mp3';
           break;
         case 'achievement':
-          audio.src = 'sounds/complete.mp3';
+          audio.src = 'assets/sounds/complete.mp3';
           break;
         case 'warning':
-          audio.src = 'sounds/click.mp3';
+          audio.src = 'assets/sounds/click.mp3';
           break;
       }
       
@@ -1388,11 +1388,11 @@ function formatFocusTime(minutes) {
     const audio2 = new Audio();
     
     if (type === 'rain') {
-      audio1.src = 'sounds/rain.mp3';
-      audio2.src = 'sounds/rain.mp3';
+      audio1.src = 'assets/sounds/rain.mp3';
+      audio2.src = 'assets/sounds/rain.mp3';
     } else if (type === 'focus') {
-      audio1.src = 'sounds/focus.mp3';
-      audio2.src = 'sounds/focus.mp3';
+      audio1.src = 'assets/sounds/focus.mp3';
+      audio2.src = 'assets/sounds/focus.mp3';
     }
     
     audio1.volume = 0.15;
