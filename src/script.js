@@ -37,10 +37,10 @@ window.addEventListener('load', () => {
 
 // preload images
 const onboardingImages = [
-  '../assets/roman-denisenko-OAx0oQ8I5a0-unsplash.jpg',
-  '../assets/eduardo-cano-photo-co-9xL_8KCEQqE-unsplash.jpg',
-  '../assets/full-shot-woman-jumping.jpg',
-  '../assets/nathan-dumlao-NXMZxygMw8o-unsplash.jpg'
+  'assets/roman-denisenko-OAx0oQ8I5a0-unsplash.jpg',
+  'assets/eduardo-cano-photo-co-9xL_8KCEQqE-unsplash.jpg',
+  'assets/full-shot-woman-jumping.jpg',
+  'assets/nathan-dumlao-NXMZxygMw8o-unsplash.jpg'
 ];
 
 onboardingImages.forEach(src => {
@@ -49,7 +49,7 @@ onboardingImages.forEach(src => {
 });
 
 const slide4Img = new Image();
-slide4Img.src = '../assets/nathan-dumlao-NXMZxygMw8o-unsplash.jpg';
+slide4Img.src = 'assets/nathan-dumlao-NXMZxygMw8o-unsplash.jpg';
 slide4Img.onload = () => {
   console.log('Slide 4 image preloaded');
 };
