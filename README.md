@@ -9,12 +9,12 @@
 
 ### 🎯 **LIVE DEMO** | 📱 **GET THE APP**
 
-<a href="https://procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app">
+<a href="https://procrastimate-chi.vercel.app/">
   <img src="https://img.shields.io/badge/🌐_EXPERIENCE_THE_BEAST-FF4433?style=for-the-badge&logoColor=white&labelColor=000" height="60"/>
 </a>
 &nbsp;&nbsp;
 <a href="https://play.google.com/store/apps/details?id=com.procrastimate.app">
-  <img src="https://img.shields.io/badge/📱_DOWNLOAD_NOW-34A853?style=for-the-badge&logo=google-play&logoColor=white&labelColor=000" height="60"/>
+  <img src="https://img.shields.io/badge/📱_COMING_SOON-FFA500?style=for-the-badge&logo=google-play&logoColor=white&labelColor=000" height="60"/>
 </a>
 
 </div>
@@ -132,7 +132,7 @@ graph LR
 ### 🌐 **Option 1: Instant Gratification**
 Click → Use → Done.
 
-<a href="https://procrastimate-pdpopzazb-saabachaoui-1974s-projects.vercel.app">
+<a href="https://procrastimate-chi.vercel.app/">
   <img src="https://img.shields.io/badge/🚀_LAUNCH_NOW-000000?style=for-the-badge&logo=vercel&logoColor=white" height="50"/>
 </a>
 
@@ -140,7 +140,7 @@ Click → Use → Done.
 Download → Install → Dominate.
 
 <a href="https://play.google.com/store/apps/details?id=com.procrastimate.app">
-  <img src="https://img.shields.io/badge/📲_GET_ANDROID_APP-3DDC84?style=for-the-badge&logo=android&logoColor=white" height="50"/>
+  <img src="https://img.shields.io/badge/📲_ANDROID_APP_(REVIEW)-FFA500?style=for-the-badge&logo=android&logoColor=white" height="50"/>
 </a>
 
 ### 💻 **Option 3: Developer Mode**
@@ -219,7 +219,7 @@ just open index.html
 + Real-time Firebase sync
 + PWA installation
 + Offline functionality
-+ Android app (Google Play ready)
++ Android app (Google Play under review)
 + Achievement system
 + Dark mode (obviously)
 
@@ -349,6 +349,6 @@ just open index.html
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Saad04040404/procrastimate&type=Date)](https://star-history.com/#Saad04040404/procrastimate&Date)
+[![GitHub stars](https://img.shields.io/github/stars/Saad647504/procrastimate?style=for-the-badge&logo=github&logoColor=white&labelColor=000&color=FF4433)](https://github.com/Saad647504/procrastimate)
 
 </div>
